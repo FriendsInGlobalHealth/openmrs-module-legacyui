@@ -49,6 +49,9 @@
 			<c:if test="${not empty extraData}">
 				<span id="extraData">${extraData}</span>
 			</c:if>
+			<c:if test="${not empty sespVersion}">
+				<span id="sespVersion"><openmrs:message code="legacyui.sesp.version"/>: ${sespVersion}</span>
+			</c:if>
 
 			<span id="poweredBy"><a href="http://openmrs.org"><openmrs:message code="footer.poweredBy"/> <img border="0" align="top" src="<%= request.getContextPath() %>/moduleResources/legacyui/images/openmrs_logo_tiny.png"/></a></span>
 		</div>

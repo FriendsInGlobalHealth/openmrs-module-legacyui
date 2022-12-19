@@ -23,6 +23,7 @@ public class FooterFullController {
 		String footerExtraData = Context.getRuntimeProperties().getProperty("legacyui.footer.extradata", "");
 		
 		model.addAttribute("extraData", footerExtraData);
+		model.addAttribute("sespVersion", Context.getAdministrationService().getGlobalProperty("eptsreports.sespversion"));
 		
 		return "module/legacyui/template/footerFull";
 	}
