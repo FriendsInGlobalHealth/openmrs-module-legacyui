@@ -200,8 +200,24 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		// add a name that will used as a duplicate for testing purposes
 		PersonName newName = new PersonName("new", null, "name");
 		newName.setDateCreated(new Date());
+		
+
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		patientModel.setPersonName(newName);
+		
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setPersonAttributeTypeId(1);
+		attributeType.setName("IDP Field Number");
+		
+		PersonAttribute attribute = new PersonAttribute();
+		attribute.setAttributeType(attributeType);
+		attribute.setPersonAttributeId(1);
+		attribute.setValue("New Attribute");
+		
+		List<PersonAttribute> attributes = new ArrayList<>();
+		attributes.add(attribute);
+		
+		patientModel.setPersonAttributes(attributes);
 		
 		BindException errors = new BindException(patientModel, "patientModel");
 		ServletWebRequest mockWebRequest = new ServletWebRequest(new MockHttpServletRequest());
