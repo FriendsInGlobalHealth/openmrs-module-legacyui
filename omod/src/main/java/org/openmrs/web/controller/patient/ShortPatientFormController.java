@@ -220,34 +220,36 @@ public class ShortPatientFormController {
 			Errors patientErrors = new BindException(patient, "patient");
 			patientValidator.validate(patient, patientErrors);
 			
-			for (PersonAttribute attribute : patient.getAttributes()) {
-				
-				String paramName = attribute.getAttributeType().getName();
-				String value = attribute.getValue();
-				
-				try {
-					Object hydratedObject = attribute.getHydratedObject();
-					if (hydratedObject == null || "".equals(hydratedObject.toString())) {
-						// if null is returned, the value should be blanked out
+			if (patientModel.getPersonAttributes() != null) {
+				for (PersonAttribute attribute : patientModel.getPersonAttributes()) {
+					
+					String paramName = attribute.getAttributeType().toString();
+					String value = attribute.getValue();
+					
+					try {
+						Object hydratedObject = attribute.getHydratedObject();
+						if (hydratedObject == null || "".equals(hydratedObject.toString())) {
+							// if null is returned, the value should be blanked out
+							attribute.setValue("");
+						} else if (hydratedObject instanceof Attributable) {
+							attribute.setValue(((Attributable) hydratedObject).serialize());
+						} else if (!hydratedObject.getClass().getName().equals(attribute.getAttributeType().getFormat())) {
+							// if the classes doesn't match the format, the hydration failed somehow
+							// TODO change the PersonAttribute.getHydratedObject() to not swallow all errors?
+							throw new APIException();
+						}
+					}
+					catch (APIException e) {
+						patientErrors.rejectValue("attributes", "Invalid value for " + paramName + ": '" + value + "'");
+						log.warn("Got an invalid value: " + value + " while setting personAttributeType id #" + paramName, e);
+						
+						// setting the value to empty so that the user can reset the value to something else
 						attribute.setValue("");
-					} else if (hydratedObject instanceof Attributable) {
-						attribute.setValue(((Attributable) hydratedObject).serialize());
-					} else if (!hydratedObject.getClass().getName().equals(attribute.getAttributeType().getFormat())) {
-						// if the classes doesn't match the format, the hydration failed somehow
-						// TODO change the PersonAttribute.getHydratedObject() to not swallow all errors?
-						throw new APIException();
+						
 					}
 				}
-				catch (APIException e) {
-					patientErrors.rejectValue("attributes", "Invalid value for " + attribute.getAttributeType().getName()
-					        + ": '" + value + "'");
-					log.warn("Got an invalid value: " + value + " while setting personAttributeType id #" + paramName, e);
-					
-					// setting the value to empty so that the user can reset the value to something else
-					attribute.setValue("");
-					
-				}
 			}
+			
 			if (patientErrors.hasErrors()) {
 				// bind the errors to the patientModel object by adding them to
 				// result since this is not a patient object
