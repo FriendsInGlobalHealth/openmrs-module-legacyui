@@ -240,7 +240,8 @@ public class ShortPatientFormController {
 						}
 					}
 					catch (APIException e) {
-						patientErrors.rejectValue("attributes", "Invalid value for " + paramName + ": '" + value + "'");
+						patientErrors.rejectValue("attributes", "Valor invàlido para " + paramName + ": '" + value
+						        + "', insira o màximo de 9 dígitos numèricos.");
 						log.warn("Got an invalid value: " + value + " while setting personAttributeType id #" + paramName, e);
 						
 						// setting the value to empty so that the user can reset the value to something else

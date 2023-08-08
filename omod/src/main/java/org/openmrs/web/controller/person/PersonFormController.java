@@ -442,7 +442,8 @@ public class PersonFormController extends SimpleFormController {
 					}
 				}
 				catch (APIException e) {
-					errors.rejectValue("attributes", "Invalid value for " + type.getName() + ": '" + value + "'");
+					errors.rejectValue("attributes", "Valor invàlido para " + type.getName() + ": '" + value
+					        + "', insira o màximo de 9 dígitos numèricos.");
 					log.warn("Got an invalid value: " + value + " while setting personAttributeType id #" + paramName, e);
 					
 					// setting the value to empty so that the user can reset the value to something else
