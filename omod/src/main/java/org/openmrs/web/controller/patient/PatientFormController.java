@@ -35,6 +35,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PatientIdentifierType.LocationBehavior;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.api.DuplicateIdentifierException;
 import org.openmrs.api.IdentifierNotUniqueException;
@@ -563,6 +564,10 @@ public class PatientFormController extends PersonFormController {
 				identifierLocationUsed = true;
 			}
 		}
+		
+		//To prevent fill form with voided attribute, lets remove it from the list 
+		removeVoidedPersonAttribute(patient);
+		
 		map.put("identifierTypes", pits);
 		map.put("identifierLocationUsed", identifierLocationUsed);
 		map.put("identifiers", patient.getIdentifiers());
@@ -579,6 +584,16 @@ public class PatientFormController extends PersonFormController {
 		super.setupReferenceData(map, patient);
 		
 		return map;
+	}
+	
+	private void removeVoidedPersonAttribute(Patient patient) {
+		Iterator<PersonAttribute> itr = patient.getAttributes().iterator();
+		while (itr.hasNext()) {
+			PersonAttribute attribute = itr.next();
+			if (attribute.isVoided()) {
+				itr.remove();
+			}
+		}
 	}
 	
 }

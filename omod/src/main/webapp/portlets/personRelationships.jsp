@@ -17,6 +17,7 @@
 
 <script type="text/javascript">
 	$j(document).ready(function() {
+		var personIDs;
 		$j('#addRelationship').dialog({
 			autoOpen: false,
 			modal: true,
@@ -101,6 +102,17 @@
 			return '<a href="javascript:voidRelationshipDialog(' + data[0] + ')" title="">' +
 				'<img src="images/delete.gif" border="0" title="<openmrs:message code="general.remove"/>"/>' +
 				'</a>';
+		},
+		function(data) {
+ 				for (var i = 0; i < personIDs.length; ++i) {
+ 					console.log("| "+i)
+ 					console.log(data[5]+" |");
+					if(personIDs[i].index == data[5]){
+					return '<a href="${pageContext.request.contextPath}/admin/patients/shortPatientForm.form?patientId='+personIDs[i].personId+'">' +
+		        	'<img src="images/male.gif" border="0" title="<openmrs:message code="legacyui.sesp.createPatient"/>"/>' +
+	               '</a>';
+					}
+ 				}
 		}
 	];
 	
@@ -108,6 +120,7 @@
 
 	function refreshRelationshipsCallback(rels) {
 		relationships = {};
+		personIDs = new Array();
 		dwr.util.removeAllRows("relationshipTableContent");
 		if (rels.length == 0) {
 			$j("#no_relationships").html('<openmrs:message code="general.none" javaScriptEscape="true"/><br /><br />');
@@ -123,18 +136,27 @@
 					if (rel.personBIsPatient)
 						relative = '<a href="patientDashboard.form?patientId=' + rel.personBId + '">' + rel.personB + '</a>';
 					else
+						{
 						relative = '<a href="personDashboard.form?personId=' + rel.personBId + '">' + rel.personB + '</a>';
+						let person ={index: i, personId:rel.personBId}
+						personIDs.push(person);
+						}
 				} else if (rel.personBId == ${model.personId}) {
 					if (rel.personAIsPatient)
 						relative = '<a href="patientDashboard.form?patientId=' + rel.personAId + '">' + rel.personA + '</a>';
 					else
+						{
 						relative = '<a href="personDashboard.form?personId=' + rel.personAId + '">' + rel.personA + '</a>';
+						let person ={index: i, personId:rel.personAId}
+						personIDs.push(person);
+						}
+						
 				}
 
 				rel.desc = relative + " (" + relation + ")";
 				relationships[rel.relationshipId] = rel;
 				dwr.util.addRows('relationshipTableContent', 
-						[ [rel.relationshipId, relative, relation, rel.startDate, rel.endDate] ], 
+						[ [rel.relationshipId, relative, relation, rel.startDate, rel.endDate, i] ], 
 						relTableCellFuncs, 
 						{escapeHtml: false});
 			}
@@ -170,6 +192,7 @@
 		$j("#addRelationship").dialog("close");
 		clearAddRelationship();	
 		DWRRelationshipService.createRelationship(personIdA, personIdB, relType, startDateString, createRelationshipCallback);
+		location.reload();
 	}
 	
 
@@ -272,6 +295,7 @@
 				<td><openmrs:message code="Relationship.relationship"/></td>
 				<td><openmrs:message code="Relationship.startDate"/></td>
 				<td><openmrs:message code="Relationship.endDate"/></td>
+				<td></td>
 				<td></td>
 				<td></td>
 			</tr>

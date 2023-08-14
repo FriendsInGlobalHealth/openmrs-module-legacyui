@@ -200,6 +200,7 @@ public class ShortPatientFormControllerTest extends BaseModuleWebContextSensitiv
 		// add a name that will used as a duplicate for testing purposes
 		PersonName newName = new PersonName("new", null, "name");
 		newName.setDateCreated(new Date());
+		
 		ShortPatientModel patientModel = new ShortPatientModel(p);
 		patientModel.setPersonName(newName);
 		
