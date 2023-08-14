@@ -6,9 +6,7 @@
 	session.removeAttribute(WebConstants.OPENMRS_LOGIN_REDIRECT_HTTPSESSION_ATTR); 
 %>
 
-<br/>
-
-<form method="post" action="<openmrs:contextPath/>/ms/legacyui/loginServlet" style="padding:15px; width: 300px;" autocomplete="off">
+<form method="post" action="<openmrs:contextPath/>/ms/legacyui/loginServlet" style="padding:15px 5px 15px 15px; width: 300px;" autocomplete="off">
 	<table>
 		<tr>
 			<td><openmrs:message code="User.username"/>:</td>

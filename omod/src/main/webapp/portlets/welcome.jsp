@@ -15,9 +15,15 @@
 		</c:if>
 	</c:when>
 	<c:otherwise>
-		<openmrs:message htmlEscape="false" code="welcome" arguments="${applicationName}" />
+		<openmrs:message htmlEscape="false" code="welcome" arguments="${applicationName}" /> <br/><br/>
+		<div style="padding-left: 25%; padding-right: 25%;">
+			<div style="border: 1px; background-color: #FFA500;">
+				<span style="font-size: 13px; color: white;  font-weight: bold; line-height: 20px;">
+					<openmrs:message code="legacyui.sesp.confidentiality.alert.message"/>
+				</span>
+			</div>
+		</div>
 		<c:if test="${model.showLogin == 'true'}">
-			<br/>
 			<openmrs:portlet url="login" parameters="redirect=${model.redirect}" />
 		</c:if>
 	</c:otherwise>
