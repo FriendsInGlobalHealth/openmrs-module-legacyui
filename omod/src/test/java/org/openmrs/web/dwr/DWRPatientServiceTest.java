@@ -63,7 +63,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 	@Verifies(value = "should not signal for a new search if it is not the first ajax call", method = "findCountAndPatients(String,Integer,Integer,null)")
 	public void findCountAndPatients_shouldNotSignalForANewSearchIfItIsNotTheFirstAjaxCall() throws Exception {
 		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 1, 10, true);
+		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 1, 10, true, false);
 		Assert.assertEquals(0, resultObjects.get("count"));
 		Assert.assertNull(resultObjects.get("searchAgain"));
 		Assert.assertNull(resultObjects.get("notification"));
@@ -76,7 +76,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 	@Verifies(value = "should not signal for a new search if the new search value has no matches", method = "findCountAndPatients(String,Integer,Integer,null)")
 	public void findCountAndPatients_shouldNotSignalForANewSearchIfTheNewSearchValueHasNoMatches() throws Exception {
 		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Jopt", 0, 10, true);
+		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Jopt", 0, 10, true, false);
 		Assert.assertEquals(0, resultObjects.get("count"));
 		Assert.assertNull(resultObjects.get("searchAgain"));
 		Assert.assertNull(resultObjects.get("notification"));
@@ -90,7 +90,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 	public void findCountAndPatients_shouldSignalForANewSearchIfTheNewSearchValueHasMatchesAndIsAFirstCall()
 	        throws Exception {
 		DWRPatientService dwrService = new DWRPatientService();
-		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 0, 10, true);
+		Map<String, Object> resultObjects = dwrService.findCountAndPatients("Joht", 0, 10, true, false);
 		Assert.assertEquals(0, resultObjects.get("count"));
 		Assert.assertEquals("Joh", resultObjects.get("searchAgain"));
 		Assert.assertNotNull(resultObjects.get("notification"));
@@ -115,7 +115,7 @@ public class DWRPatientServiceTest extends BaseModuleWebContextSensitiveTest {
 		
 		//Let's do this in a case insensitive way
 		Map<String, Object> resultObjects = new DWRPatientService().findCountAndPatients(identifier.toLowerCase(), 0, null,
-		    true);
+		    true, false);
 		Assert.assertEquals(1, resultObjects.get("count"));
 		Assert.assertEquals(1, ((List<?>) resultObjects.get("objectList")).size());
 	}

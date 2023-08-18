@@ -86,6 +86,13 @@ public class PersonListItem {
 		}
 	}
 	
+	public static PersonListItem createBestMatchPerson(Person person) {
+		if (!(person instanceof Patient)) {
+			return new PersonListItem(person);
+		}
+		return null;
+	}
+	
 	/**
 	 * Default empty constructor
 	 */
