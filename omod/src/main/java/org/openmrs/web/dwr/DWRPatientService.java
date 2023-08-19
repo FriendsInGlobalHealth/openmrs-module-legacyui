@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
@@ -29,8 +28,6 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
-import org.openmrs.Role;
-import org.openmrs.User;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
@@ -44,7 +41,6 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientIdentifierException;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
-import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.patient.IdentifierValidator;
@@ -699,6 +695,8 @@ public class DWRPatientService implements GlobalPropertyListener {
 	private Vector<Object> findBatchOfPeople(String searchPhrase, boolean includeRetired, String roles, Integer start,
 	        Integer length) {
 		Vector<Object> personList = new Vector<Object>();
+		
+		PersonService personService = Context.getPersonService();
 		try {
 			Boolean includeVoided = includeRetired;
 			
@@ -706,9 +704,12 @@ public class DWRPatientService implements GlobalPropertyListener {
 			// if no roles were given, search for normal people
 			PersonService ps = Context.getPersonService();
 			for (Person p : ps.getPeople(searchPhrase, null, includeVoided)) {
-				PersonListItem personListItem = PersonListItem.createBestMatchPerson(p);
+				PersonListItem personListItem = createBestMatchPerson(p);
 				if (personListItem != null) {
+					personListItem.setRelationships(personService.getRelationshipsByPerson(new Person(personListItem
+					        .getPersonId())));
 					personList.add(personListItem);
+					
 				}
 			}
 			
@@ -716,8 +717,10 @@ public class DWRPatientService implements GlobalPropertyListener {
 			if (searchPhrase.matches(".*\\d+.*")) {
 				PatientService patientService = Context.getPatientService();
 				for (Patient p : patientService.getPatients(searchPhrase, null, null, false)) {
-					PersonListItem personListItem = PersonListItem.createBestMatchPerson(p);
+					PersonListItem personListItem = createBestMatchPerson(p);
 					if (personListItem != null) {
+						personListItem.setRelationships(personService.getRelationshipsByPerson(new Person(personListItem
+						        .getPersonId())));
 						personList.add(personListItem);
 					}
 				}
@@ -730,5 +733,12 @@ public class DWRPatientService implements GlobalPropertyListener {
 			personList.add(Context.getMessageSourceService().getMessage("Person.search.error") + " - " + e.getMessage());
 		}
 		return personList;
+	}
+	
+	public PersonListItem createBestMatchPerson(Person person) {
+		if (!(person instanceof Patient)) {
+			return new PersonListItem(person);
+		}
+		return null;
 	}
 }

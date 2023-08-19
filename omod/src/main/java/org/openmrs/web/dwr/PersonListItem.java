@@ -9,17 +9,23 @@
  */
 package org.openmrs.web.dwr;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
+import org.openmrs.Relationship;
+import org.openmrs.api.context.Context;
 import org.openmrs.web.WebUtil;
 
 /**
@@ -68,6 +74,10 @@ public class PersonListItem {
 	
 	private Map<String, String> attributes = new HashMap<String, String>();
 	
+	private List<Relationship> relationships = new ArrayList<Relationship>();
+	
+	private String relationship;
+	
 	/**
 	 * Creates an instance of a subclass of PersonListItem which is best suited for the parameter.
 	 * If a {@link Patient} is passed in, a {@link PatientListItem} is returned, otherwise a
@@ -84,13 +94,6 @@ public class PersonListItem {
 		} else {
 			return new PersonListItem(person);
 		}
-	}
-	
-	public static PersonListItem createBestMatchPerson(Person person) {
-		if (!(person instanceof Patient)) {
-			return new PersonListItem(person);
-		}
-		return null;
 	}
 	
 	/**
@@ -410,4 +413,27 @@ public class PersonListItem {
 		return uuid;
 	}
 	
+	public String getRelationship() {
+		return relationship;
+	}
+	
+	public void setRelationships(List<Relationship> relationships) {
+		this.relationships = relationships;
+		String indexCaseRelationship = "";
+		for (Relationship relationship : relationships) {
+			Person personA = relationship.getPersonA();
+			indexCaseRelationship += personA.getPersonName().getFullName() + "\t";
+			
+			Patient patientA = Context.getPatientService().getPatient(personA.getId());
+			if (Objects.nonNull(patientA)) {
+				for (PatientIdentifier patientIdentifier : patientA.getIdentifiers()) {
+					if (2 == patientIdentifier.getIdentifierType().getId()) {
+						indexCaseRelationship += patientIdentifier.getIdentifier();
+					}
+				}
+			}
+			indexCaseRelationship += "\n";
+		}
+		relationship = indexCaseRelationship;
+	}
 }
