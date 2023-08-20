@@ -422,17 +422,35 @@ public class PersonListItem {
 		String indexCaseRelationship = "";
 		for (Relationship relationship : relationships) {
 			Person personA = relationship.getPersonA();
-			indexCaseRelationship += personA.getPersonName().getFullName() + "\t";
+			Person personB = relationship.getPersonB();
 			
 			Patient patientA = Context.getPatientService().getPatient(personA.getId());
 			if (Objects.nonNull(patientA)) {
 				for (PatientIdentifier patientIdentifier : patientA.getIdentifiers()) {
-					if (2 == patientIdentifier.getIdentifierType().getId()) {
-						indexCaseRelationship += patientIdentifier.getIdentifier();
+					if (2 == patientIdentifier.getIdentifierType().getId() && personA.getId() != personId) {
+						if (StringUtils.isNotEmpty(indexCaseRelationship)) {
+							indexCaseRelationship += " <br/> ";
+						}
+						indexCaseRelationship += personA.getPersonName().getFullName() + "\t"
+						        + patientIdentifier.getIdentifier();
 					}
 				}
 			}
-			indexCaseRelationship += "\n";
+			
+			Patient patientB = Context.getPatientService().getPatient(personB.getId());
+			if (Objects.nonNull(patientB)) {
+				for (PatientIdentifier patientIdentifier : patientB.getIdentifiers()) {
+					
+					if (2 == patientIdentifier.getIdentifierType().getId() && patientB.getId() != personId) {
+						if (StringUtils.isNotEmpty(indexCaseRelationship)) {
+							indexCaseRelationship += " <br/> ";
+						}
+						indexCaseRelationship += patientB.getPersonName().getFullName() + "\t"
+						        + patientIdentifier.getIdentifier();
+					}
+				}
+			}
+			
 		}
 		relationship = indexCaseRelationship;
 	}
