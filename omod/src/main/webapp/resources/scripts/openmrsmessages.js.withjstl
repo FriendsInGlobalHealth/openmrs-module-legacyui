@@ -25,7 +25,6 @@ omsgs.searchLabel="<openmrs:message code="general.search" javaScriptEscape="true
 omsgs.includeDisabled="<openmrs:message code="SearchResults.includeDisabled" javaScriptEscape="true"/>";
 omsgs.includeRetired="<openmrs:message code="SearchResults.includeRetired" javaScriptEscape="true"/>";
 omsgs.includeVoided="<openmrs:message code="SearchResults.includeVoided" javaScriptEscape="true"/>";
-omsgs.includePersonLabel="<openmrs:message code="legacyui.searchResults.includePerson" javaScriptEscape="true"/>";
 omsgs.includeVerbose="<openmrs:message code="SearchResults.includeVerbose" javaScriptEscape="true"/>";
 omsgs.minCharactersPhrase1="<openmrs:message code="SearchResults.minCharactersPhrase1" javaScriptEscape="true"/> ";
 omsgs.minCharactersPhrase2=" <openmrs:message code="SearchResults.minCharactersPhrase2" javaScriptEscape="true"/>";
@@ -51,7 +50,6 @@ omsgs.conceptReferenceTermCode="<openmrs:message javaScriptEscape="true" code="C
 omsgs.referencTermSearchPlaceholder="<openmrs:message javaScriptEscape="true" code="ConceptReferenceTerm.searchBox.placeholder"/>";
 omsgs.charactersLeft="<openmrs:message javaScriptEscape="true" code="general.charactersLeft"/>";
 omsgs.relationships="<openmrs:message code="Relationship.portlet.title" javaScriptEscape="true"/>";
-omsgs.relationship="<openmrs:message code="legacyui.searchResults.indexCaseRelationship" javaScriptEscape="true"/>";
 
 omsgs.genderArray=new Array();
 <openmrs:forEachRecord name='gender'>
@@ -122,3 +120,5 @@ omsgs.providerName="<openmrs:message code="Provider.name" javaScriptEscape="true
 omsgs.providerIdentifier="<openmrs:message code="Provider.identifier" javaScriptEscape="true" />";
 userProperties.showRetired=<openmrs:userProperty key="showRetired" defaultValue="false"/>;
 userProperties.showVerbose=<openmrs:userProperty key="showVerbose" defaultValue="false"/>;
+omsgs.includePersonLabel="<openmrs:message code="legacyui.searchResults.includePerson" javaScriptEscape="true"/>";
+omsgs.relationship="<openmrs:message code="legacyui.searchResults.indexCaseRelationship" javaScriptEscape="true"/>";

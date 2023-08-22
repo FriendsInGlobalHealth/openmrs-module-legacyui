@@ -27,7 +27,7 @@
 
 <h2><openmrs:message code="Relationship.title"/></h2>
 
-<a href="${pageContext.request.contextPath}/admin/person/relationship.form"><openmrs:message code="Relationship.add"/></a><br/><br/>
+<a href="${pageContext.request.contextPath}/admin/person/relationship.form"><openmrs:message code="legacyui.Relationship.add"/></a><br/><br/>
 
 <div id="findRelationship">
 	<b class="boxHeader"><openmrs:message code="Person.find"/></b>

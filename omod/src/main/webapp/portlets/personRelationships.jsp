@@ -21,7 +21,7 @@
 		$j('#addRelationship').dialog({
 			autoOpen: false,
 			modal: true,
-			title: '<openmrs:message code="Relationship.add" javaScriptEscape="true"/>',
+			title: '<openmrs:message code="legacyui.Relationship.add" javaScriptEscape="true"/>',
 			width: '50%',
 			zIndex: 100,
 			buttons: { 
@@ -303,7 +303,7 @@
 		<tbody id="relationshipTableContent"></tbody>
 	</table>
 
-	<a id="addRelationshipLink" href="#"><openmrs:message code="Relationship.add"/></a>
+	<a id="addRelationshipLink" href="#"><openmrs:message code="legacyui.Relationship.add"/></a>
 	
 	<div id="addRelationship">
 		<openmrs:message code="Relationship.whatType"/>
