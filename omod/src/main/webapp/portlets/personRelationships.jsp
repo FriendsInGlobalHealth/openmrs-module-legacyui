@@ -17,7 +17,7 @@
 
 <script type="text/javascript">
 	$j(document).ready(function() {
-		var personIDs;
+		/* var personIDs; */
 		$j('#addRelationship').dialog({
 			autoOpen: false,
 			modal: true,
@@ -102,7 +102,7 @@
 			return '<a href="javascript:voidRelationshipDialog(' + data[0] + ')" title="">' +
 				'<img src="images/delete.gif" border="0" title="<openmrs:message code="general.remove"/>"/>' +
 				'</a>';
-		},
+		}/* ,
 		function(data) {
  				for (var i = 0; i < personIDs.length; ++i) {
  					console.log("| "+i)
@@ -113,14 +113,14 @@
 	               '</a>';
 					}
  				}
-		}
+		} */
 	];
 	
 	var relationships = {};	
 
 	function refreshRelationshipsCallback(rels) {
 		relationships = {};
-		personIDs = new Array();
+/* 		personIDs = new Array(); */
 		dwr.util.removeAllRows("relationshipTableContent");
 		if (rels.length == 0) {
 			$j("#no_relationships").html('<openmrs:message code="general.none" javaScriptEscape="true"/><br /><br />');
@@ -138,8 +138,8 @@
 					else
 						{
 						relative = '<a href="personDashboard.form?personId=' + rel.personBId + '">' + rel.personB + '</a>';
-						let person ={index: i, personId:rel.personBId}
-						personIDs.push(person);
+/* 						let person ={index: i, personId:rel.personBId}
+						personIDs.push(person); */
 						}
 				} else if (rel.personBId == ${model.personId}) {
 					if (rel.personAIsPatient)
@@ -147,8 +147,8 @@
 					else
 						{
 						relative = '<a href="personDashboard.form?personId=' + rel.personAId + '">' + rel.personA + '</a>';
-						let person ={index: i, personId:rel.personAId}
-						personIDs.push(person);
+/* 						let person ={index: i, personId:rel.personAId}
+						personIDs.push(person); */
 						}
 						
 				}
@@ -192,7 +192,7 @@
 		$j("#addRelationship").dialog("close");
 		clearAddRelationship();	
 		DWRRelationshipService.createRelationship(personIdA, personIdB, relType, startDateString, createRelationshipCallback);
-		location.reload();
+		/* location.reload(); */
 	}
 	
 
