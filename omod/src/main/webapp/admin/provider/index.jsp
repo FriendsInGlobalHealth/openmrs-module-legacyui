@@ -15,7 +15,7 @@
 	
 	$j(document).ready(
 	function() {
-		new OpenmrsSearch("findProvider", true, doProviderSearch, doSelectionHandler, 
+		new OpenmrsSearch("findProvider", true, false, doProviderSearch, doSelectionHandler, 
 				[	{fieldName:"displayName", header:omsgs.providerName},
 					{fieldName:"identifier", header:omsgs.providerIdentifier}
 				],

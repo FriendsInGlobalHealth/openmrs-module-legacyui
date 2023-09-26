@@ -77,9 +77,12 @@ function OpenmrsSearch(div, showIncludeVoided, showIncludePersons, searchHandler
         opts.searchHandler = searchHandler;
     if(!opts.fieldsAndHeaders)
         opts.fieldsAndHeaders = fieldsAndHeaders;
-  	if(!opts.showIncludePersons)
-        opts.showIncludePersons = showIncludePersons;
-
+	
+	if(showIncludePersons == true){
+		if(!opts.showIncludePersons)
+    		opts.showIncludePersons = showIncludePersons;
+	}
+	
     jQuery(el).openmrsSearch(opts);
 }
 
@@ -252,7 +255,7 @@ function OpenmrsSearch(div, showIncludeVoided, showIncludePersons, searchHandler
                     tmp.prop('checked', true);
             }
 
-			if(o.showIncludePersons) {
+			if(o.showIncludePersons == true) {
                 var tmp = div.find("#includePersons");
                 tmp.after("<label for='includePersons'>" + o.includePersonLabel + "</label>");
                 tmp.show();
@@ -803,9 +806,17 @@ function OpenmrsSearch(div, showIncludeVoided, showIncludePersons, searchHandler
                 false, {includeVoided: this.options.showIncludeVoided && checkBox.prop('checked'),
                     start: startIndex, length: actualBatchSize});
 
-			this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
+			
+			if(this.options.showIncludePersons){
+				this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
                 false, {includePersons: this.options.showIncludePersons && personCheckBox.prop('checked'),
+                    start: startIndex, length: actualBatchSize});	
+			}
+			else{
+				  this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
+                false, {includeVoided: this.options.showIncludeVoided && checkBox.prop('checked'),
                     start: startIndex, length: actualBatchSize});
+			}
 
             if(inSerialMode)
                 return;

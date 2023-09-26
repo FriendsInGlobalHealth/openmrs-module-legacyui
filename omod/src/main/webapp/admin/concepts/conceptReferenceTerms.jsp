@@ -12,7 +12,7 @@
 
 <script type="text/javascript">
 	$j(document).ready(function() {
-		new OpenmrsSearch("findConceptReferenceTerm", true, doConceptReferenceTermSearch, doSelectionHandler, 
+		new OpenmrsSearch("findConceptReferenceTerm", true, false, doConceptReferenceTermSearch, doSelectionHandler, 
 				[	{fieldName:"code", header:omsgs.conceptReferenceTermCode},
 				 	{fieldName:"name", header:omsgs.name},
 					{fieldName:"conceptSourceName", header:omsgs.conceptSource}
