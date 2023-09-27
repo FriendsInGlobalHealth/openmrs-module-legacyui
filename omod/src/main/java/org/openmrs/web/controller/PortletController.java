@@ -350,8 +350,7 @@ public class PortletController implements Controller {
 						}
 						list.add(rel);
 						
-						convertibleRelationships.add(new ConvertibleRelationship(rel.getRelationshipId(), rel.getPersonA(),
-						        rel.getPersonB()));
+						convertibleRelationships.add(new ConvertibleRelationship(rel, rel.getPersonA(), rel.getPersonB()));
 					}
 					
 					model.put("personRelationships", relationships);
@@ -445,8 +444,8 @@ public class PortletController implements Controller {
 		public ConvertibleRelationship() {
 		}
 		
-		public ConvertibleRelationship(Integer relationshipId, Person personA, Person personB) {
-			this.relationshipId = relationshipId;
+		public ConvertibleRelationship(Relationship relationship, Person personA, Person personB) {
+			this.relationshipId = relationship.getRelationshipId();
 			
 			if (!personA.getIsPatient()) {
 				List<Obs> observations = Context.getObsService().getObservationsByPersonAndConcept(personA,
@@ -454,7 +453,18 @@ public class PortletController implements Controller {
 				for (Obs obs : observations) {
 					if (obs.getValueCoded() != null && POSETIVE_ANSWER_CONCEPT_ID.equals(obs.getValueCoded().getConceptId())) {
 						this.isConvertible = Boolean.TRUE;
-						break;
+						return;
+					}
+				}
+			}
+			
+			if (!personB.getIsPatient()) {
+				List<Obs> observations = Context.getObsService().getObservationsByPersonAndConcept(personB,
+				    new Concept(HIV_TEST_CONCEPT_ID));
+				for (Obs obs : observations) {
+					if (obs.getValueCoded() != null && POSETIVE_ANSWER_CONCEPT_ID.equals(obs.getValueCoded().getConceptId())) {
+						this.isConvertible = Boolean.TRUE;
+						return;
 					}
 				}
 			}
