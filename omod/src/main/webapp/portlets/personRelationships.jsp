@@ -81,6 +81,12 @@
 			rel.personBId = ${rel.personB.personId};
 			rel.personAIsPatient = ${rel.personA.patient};
 			rel.personBIsPatient = ${rel.personB.patient};
+			rel.isConvertible = false;
+			<c:forEach var="rel2" items="${model.convertiblePersonRelationships}">
+				if(rel.relationshipId == ${rel2.relationshipId}){
+					rel.isConvertible = ${rel2.isConvertible};	
+				}
+			</c:forEach>
 			rel.startDate = '<openmrs:formatDate date="${rel.startDate}" type="textbox"/>';
 			rel.endDate = '<openmrs:formatDate date="${rel.endDate}" type="textbox"/>';
 			rels.push(rel);
@@ -105,8 +111,8 @@
 		},
 		function(data) {
  				for (var i = 0; i < personIDs.length; ++i) {
- 					console.log("| "+i)
- 					console.log(data[5]+" |");
+ 					//console.log("| "+i)
+ 					//console.log(data[5]+" |");
 					if(personIDs[i].index == data[5]){
 					return '<a href="${pageContext.request.contextPath}/admin/patients/shortPatientForm.form?patientId='+personIDs[i].personId+'">' +
 		        	'<img src="images/male.gif" border="0" title="<openmrs:message code="legacyui.sesp.createPatient"/>"/>' +
@@ -137,18 +143,24 @@
 						relative = '<a href="patientDashboard.form?patientId=' + rel.personBId + '">' + rel.personB + '</a>';
 					else
 						{
-						relative = '<a href="personDashboard.form?personId=' + rel.personBId + '">' + rel.personB + '</a>';
-						let person ={index: i, personId:rel.personBId}
-						personIDs.push(person);
+							relative = '<a href="personDashboard.form?personId=' + rel.personBId + '">' + rel.personB + '</a>';
+							let person ={index: i, personId:rel.personBId, isConvertible: rel.isConvertible};
+							
+							if(person.isConvertible){
+								personIDs.push(person);		
+							}
 						}
 				} else if (rel.personBId == ${model.personId}) {
 					if (rel.personAIsPatient)
 						relative = '<a href="patientDashboard.form?patientId=' + rel.personAId + '">' + rel.personA + '</a>';
 					else
 						{
-						relative = '<a href="personDashboard.form?personId=' + rel.personAId + '">' + rel.personA + '</a>';
-						let person ={index: i, personId:rel.personAId}
-						personIDs.push(person);
+							relative = '<a href="personDashboard.form?personId=' + rel.personAId + '">' + rel.personA + '</a>';
+							let person ={index: i, personId:rel.personAId, isConvertible: rel.isConvertible};
+	
+							if(person.isConvertible){
+								personIDs.push(person);		
+							}
 						}
 						
 				}
