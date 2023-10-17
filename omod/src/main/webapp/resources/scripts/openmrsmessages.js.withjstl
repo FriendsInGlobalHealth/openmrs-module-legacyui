@@ -49,6 +49,7 @@ omsgs.conceptSource="<openmrs:message javaScriptEscape="true" code="ConceptRefer
 omsgs.conceptReferenceTermCode="<openmrs:message javaScriptEscape="true" code="ConceptReferenceTerm.code"/>";
 omsgs.referencTermSearchPlaceholder="<openmrs:message javaScriptEscape="true" code="ConceptReferenceTerm.searchBox.placeholder"/>";
 omsgs.charactersLeft="<openmrs:message javaScriptEscape="true" code="general.charactersLeft"/>";
+omsgs.relationships="<openmrs:message code="Relationship.portlet.title" javaScriptEscape="true"/>";
 
 omsgs.genderArray=new Array();
 <openmrs:forEachRecord name='gender'>
@@ -119,3 +120,5 @@ omsgs.providerName="<openmrs:message code="Provider.name" javaScriptEscape="true
 omsgs.providerIdentifier="<openmrs:message code="Provider.identifier" javaScriptEscape="true" />";
 userProperties.showRetired=<openmrs:userProperty key="showRetired" defaultValue="false"/>;
 userProperties.showVerbose=<openmrs:userProperty key="showVerbose" defaultValue="false"/>;
+omsgs.includePersonLabel="<openmrs:message code="legacyui.searchResults.includePerson" javaScriptEscape="true"/>";
+omsgs.relationship="<openmrs:message code="legacyui.searchResults.indexCaseRelationship" javaScriptEscape="true"/>";

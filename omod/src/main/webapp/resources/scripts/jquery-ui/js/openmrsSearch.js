@@ -59,7 +59,7 @@
  *	});
  *	</pre>
  **/
-function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, fieldsAndHeaders, opts) {
+function OpenmrsSearch(div, showIncludeVoided, showIncludePersons, searchHandler, selectionHandler, fieldsAndHeaders, opts) {
     var el;
     if(typeof div == 'string') {
         el = jQuery("#" + div);
@@ -77,7 +77,12 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
         opts.searchHandler = searchHandler;
     if(!opts.fieldsAndHeaders)
         opts.fieldsAndHeaders = fieldsAndHeaders;
-
+	
+	if(showIncludePersons == true){
+		if(!opts.showIncludePersons)
+    		opts.showIncludePersons = showIncludePersons;
+	}
+	
     jQuery(el).openmrsSearch(opts);
 }
 
@@ -124,6 +129,7 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
                         '<span id="searchLabelNode"></span>'+
                         '<input type="text" value="" id="inputNode" autocomplete="off" placeholder=" " />'+
                         '<img id="spinner" src="" /><input type="checkbox" style="display: none" id="includeVoided" />&nbsp;&nbsp;'+
+						'<input type="checkbox" style="display: none" id="includePersons" />&nbsp;&nbsp;'+
                         '<input type="checkbox" style="display: none" id="includeVerbose" />'+
                         '<span id="loadingMsg"></span>'+
                         '<span id="minCharError" class="error"></span>'+
@@ -161,6 +167,7 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
             minLength: omsgs.minSearchCharactersGP,
             searchLabel: ' ',
             includeVoidedLabel: omsgs.includeVoided,
+			includePersonLabel: omsgs.includePersonLabel,
             includeVerboseLabel: omsgs.showVerbose,
             displayLength: 10,
             columnWidths: null,
@@ -186,6 +193,7 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
                 input = div.find("#inputNode"),
                 table = div.find("#openmrsSearchTable");
             checkBox = div.find("#includeVoided");
+			personCheckBox = div.find("#includePersons");
             verboseCheckBox = div.find("#includeVerbose");
             spinnerObj = div.find("#spinner");
             spinnerObj.css("visibility", "hidden");
@@ -226,6 +234,34 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
 
                 //when the user checks/unchecks the includeVoided checkbox, trigger a search
                 checkBox.click(function() {
+                    if($j.trim(input.val()) != '' || self.options.doSearchWhenEmpty)
+                        self._doSearch(input.val());
+                    else{
+                        if(spinnerObj.css("visibility") == 'visible')
+                            spinnerObj.css("visibility", "hidden");
+                        //if the user is viewing initial data, ignore
+                        if($j.trim(input.val()) != ''){
+                            $j("#minCharError").css("visibility", "visible");
+                            $j(".openmrsSearchDiv").hide();
+                        }
+                        if($j('#pageInfo').css("visibility") == 'visible')
+                            $j('#pageInfo').css("visibility", "hidden");
+                    }
+                    //to maintain keyDown and keyUp events since they are only fired when the input box has focus
+                    input.focus();
+                });
+
+                if(userProperties.showRetired)
+                    tmp.prop('checked', true);
+            }
+
+			if(o.showIncludePersons == true) {
+                var tmp = div.find("#includePersons");
+                tmp.after("<label for='includePersons'>" + o.includePersonLabel + "</label>");
+                tmp.show();
+
+                //when the user checks/unchecks the includeVoided checkbox, trigger a search
+                personCheckBox.click(function() {
                     if($j.trim(input.val()) != '' || self.options.doSearchWhenEmpty)
                         self._doSearch(input.val());
                     else{
@@ -554,6 +590,12 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
                 	self.options.includeVoided = true;
                 	sessionStorage.removeItem("includeVoided");
                 }
+				
+				 if(sessionStorage.includePersons){
+                	self.options.includePersons = true;
+                	sessionStorage.removeItem("includePersons");
+                }
+
                 if(sessionStorage.includeVerbose){
                 	self.options.showVerbose = true;
                 	sessionStorage.removeItem("includeVerbose");
@@ -588,7 +630,12 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
             	}
             	if(self.options.includeVoided){
             		$j('#includeVoided').attr('checked','checked');
-            	}           	
+            	} 
+				if(self.options.includePersons){
+            		$j('#includePersons').attr('checked','checked');
+            	}
+
+          	
             }
             $j(input).val(self.options.searchPhrase).keyup();
         	//setting the cursor to the end of the searchPhrase
@@ -758,6 +805,18 @@ function OpenmrsSearch(div, showIncludeVoided, searchHandler, selectionHandler, 
             this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
                 false, {includeVoided: this.options.showIncludeVoided && checkBox.prop('checked'),
                     start: startIndex, length: actualBatchSize});
+
+			
+			if(this.options.showIncludePersons){
+				this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
+                false, {includePersons: this.options.showIncludePersons && personCheckBox.prop('checked'),
+                    start: startIndex, length: actualBatchSize});	
+			}
+			else{
+				  this.options.searchHandler(searchText, this._addMoreRows(curCallCount, searchText, matchCount, startIndex, curSubCallCount),
+                false, {includeVoided: this.options.showIncludeVoided && checkBox.prop('checked'),
+                    start: startIndex, length: actualBatchSize});
+			}
 
             if(inSerialMode)
                 return;

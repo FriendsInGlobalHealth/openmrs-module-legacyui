@@ -154,7 +154,7 @@
 			<script type="text/javascript">
 				var lastSearch;
 				$j(document).ready(function() {
-					new OpenmrsSearch("findPatients", false, doPatientSearch, doSelectionHandler,
+					new OpenmrsSearch("findPatients", false, true, doPatientSearch, doSelectionHandler,
 						[	{fieldName:"identifier", header:omsgs.identifier},
 							{fieldName:"givenName", header:omsgs.givenName},
 							{fieldName:"middleName", header:omsgs.middleName},
@@ -162,7 +162,8 @@
 							{fieldName:"age", header:omsgs.age},
 							{fieldName:"gender", header:omsgs.gender},
 							{fieldName:"birthdateString", header:omsgs.birthdate},
-							{fieldName:"deathDateString", header:omsgs.deathdate}
+							{fieldName:"deathDateString", header:omsgs.deathdate},
+							{fieldName:"relationship", header:omsgs.relationship}
 						],
 						{
                             searchLabel: '<openmrs:message code="Patient.searchBox" javaScriptEscape="true"/>',
@@ -196,13 +197,25 @@
 				});
 
 				function doSelectionHandler(index, data) {
-					document.location = "${model.postURL}?patientId=" + data.patientId + "&phrase=" + lastSearch;
+					
+					if(data.patientId){
+						document.location = "${model.postURL}?patientId=" + data.patientId + "&phrase=" + lastSearch;
+						return;
+					}
+					if(data.personId){
+						document.location = "${pageContext.request.contextPath}/admin/patients/shortPatientForm.form?patientId=" + data.personId;
+						return;
+					}
 				}
 
 				//searchHandler for the Search widget
 				function doPatientSearch(text, resultHandler, getMatchCount, opts) {
 					lastSearch = text;
-					DWRPatientService.findCountAndPatients(text, opts.start, opts.length, getMatchCount, resultHandler);
+					DWRPatientService.findCountAndPatients(text, opts.start, opts.length, getMatchCount, includePersons(),  resultHandler);
+				} 
+				
+				function includePersons() {
+				    return document.getElementById("includePersons").checked;
 				}
 
 			</script>

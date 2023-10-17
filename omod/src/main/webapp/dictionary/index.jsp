@@ -15,7 +15,7 @@
 <script type="text/javascript">
 		
 	$j(document).ready(function() {
-		new OpenmrsSearch("findConcept", true, doConceptSearch, doSelectionHandler, 
+		new OpenmrsSearch("findConcept", true, false, doConceptSearch, doSelectionHandler, 
 				[{fieldName:"name", header:" "}, {fieldName:"preferredName", header:" "}],
 				{searchLabel: '<openmrs:message code="Concept.search" javaScriptEscape="true"/>',
                     searchPlaceholder:'<openmrs:message code="Concept.search.placeholder" javaScriptEscape="true"/>',

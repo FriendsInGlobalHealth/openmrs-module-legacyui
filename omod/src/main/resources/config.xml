@@ -284,8 +284,8 @@
 				DWRMessageService.sendMessage(String recipients, String sender, String subject, String content);
 				DWRPatientService.findBatchOfPatients(String searchValue, boolean includeVoided, Integer start, Integer length);
 				DWRPatientService.findPatients(String searchValue, boolean includeVoided);
-				DWRPatientService.findCountAndPatients(String searchValue, Integer start, Integer length, boolean getMatchCount);
-				DWRPatientService.findCountAndPatientsWithVoided(String searchValue, Integer start, Integer length, boolean getMatchCount, Boolean includeVoided);
+				DWRPatientService.findCountAndPatients(String searchValue, Integer start, Integer length, boolean getMatchCount, Boolean includePersons);
+				DWRPatientService.findCountAndPatientsWithVoided(String searchValue, Integer start, Integer length, boolean getMatchCount, Boolean includeVoided, Boolean includePersons);
 				DWRVisitService.findVisitsByPatient(Integer patientId, boolean includeEnded, boolean includeVoided);
 				DWRVisitService.getVisit(Integer visitId);
 				DWRVisitService.findEncountersByVisit(Integer visitId);

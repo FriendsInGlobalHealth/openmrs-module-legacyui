@@ -26,6 +26,7 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
@@ -39,6 +40,7 @@ import org.openmrs.api.InvalidIdentifierFormatException;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientIdentifierException;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.legacyui.api.LegacyUIService;
 import org.openmrs.patient.IdentifierValidator;
@@ -119,15 +121,19 @@ public class DWRPatientService implements GlobalPropertyListener {
 		for (Patient p : patients) {
 			patientList.add(new PatientListItem(p, searchValue));
 		}
-		//no results found and a number was in the search --
-		//should check whether the check digit is correct.
+		// no results found and a number was in the search --
+		// should check whether the check digit is correct.
 		if (patients.size() == 0 && searchValue.matches(".*\\d+.*")) {
 			
-			//Looks through all the patient identifier validators to see if this type of identifier
-			//is supported for any of them.  If it isn't, then no need to warn about a bad check
-			//digit.  If it does match, then if any of the validators validates the check digit
-			//successfully, then the user is notified that the identifier has been entered correctly.
-			//Otherwise, the user is notified that the identifier was entered incorrectly.
+			// Looks through all the patient identifier validators to see if this type of
+			// identifier
+			// is supported for any of them. If it isn't, then no need to warn about a bad
+			// check
+			// digit. If it does match, then if any of the validators validates the check
+			// digit
+			// successfully, then the user is notified that the identifier has been entered
+			// correctly.
+			// Otherwise, the user is notified that the identifier was entered incorrectly.
 			
 			Collection<IdentifierValidator> pivs = ps.getAllIdentifierValidators();
 			boolean shouldWarnUser = true;
@@ -176,9 +182,9 @@ public class DWRPatientService implements GlobalPropertyListener {
 	 * @throws APIException
 	 */
 	public Map<String, Object> findCountAndPatientsWithVoided(String searchValue, Integer start, Integer length,
-	        boolean getMatchCount, Boolean includeVoided) throws APIException {
+	        boolean getMatchCount, Boolean includeVoided, Boolean includePersons) throws APIException {
 		
-		//Map to return
+		// Map to return
 		Map<String, Object> resultsMap = new HashMap<String, Object>();
 		Collection<Object> objectList = new Vector<Object>();
 		
@@ -189,13 +195,13 @@ public class DWRPatientService implements GlobalPropertyListener {
 		try {
 			PatientService ps = Context.getPatientService();
 			int patientCount = 0;
-			//if this is the first call
+			// if this is the first call
 			if (getMatchCount) {
 				patientCount += ps.getCountOfPatients(searchValue, includeVoided);
 				
 				// if there are no results found and a number was not in the
-				// search and this is the first call, then do a decapitated search: 
-				//trim each word down to the first three characters and search again				
+				// search and this is the first call, then do a decapitated search:
+				// trim each word down to the first three characters and search again
 				if (patientCount == 0 && start == 0 && !searchValue.matches(".*\\d+.*")) {
 					String[] names = searchValue.split(" ");
 					StringBuilder newSearch = new StringBuilder("");
@@ -220,15 +226,19 @@ public class DWRPatientService implements GlobalPropertyListener {
 					}
 				}
 				
-				//no results found and a number was in the search --
-				//should check whether the check digit is correct.
+				// no results found and a number was in the search --
+				// should check whether the check digit is correct.
 				else if (patientCount == 0 && searchValue.matches(".*\\d+.*")) {
 					
-					//Looks through all the patient identifier validators to see if this type of identifier
-					//is supported for any of them.  If it isn't, then no need to warn about a bad check
-					//digit.  If it does match, then if any of the validators validates the check digit
-					//successfully, then the user is notified that the identifier has been entered correctly.
-					//Otherwise, the user is notified that the identifier was entered incorrectly.
+					// Looks through all the patient identifier validators to see if this type of
+					// identifier
+					// is supported for any of them. If it isn't, then no need to warn about a bad
+					// check
+					// digit. If it does match, then if any of the validators validates the check
+					// digit
+					// successfully, then the user is notified that the identifier has been entered
+					// correctly.
+					// Otherwise, the user is notified that the identifier was entered incorrectly.
 					
 					Collection<IdentifierValidator> pivs = ps.getAllIdentifierValidators();
 					boolean shouldWarnUser = true;
@@ -258,8 +268,9 @@ public class DWRPatientService implements GlobalPropertyListener {
 						}
 					}
 				} else {
-					//ensure that count never exceeds this value because the API's service layer would never
-					//return more than it since it is limited in the DAO layer
+					// ensure that count never exceeds this value because the API's service layer
+					// would never
+					// return more than it since it is limited in the DAO layer
 					if (maximumResults == null) {
 						setMaximumResults(getMaximumSearchResults());
 					}
@@ -277,13 +288,26 @@ public class DWRPatientService implements GlobalPropertyListener {
 				
 			}
 			
-			//if we have any matches or this isn't the first ajax call when the caller
-			//requests for the count
+			// if we have any matches or this isn't the first ajax call when the caller
+			// requests for the count
 			if (patientCount > 0 || !getMatchCount) {
 				objectList = findBatchOfPatients(searchValue, includeVoided, start, length);
 			}
 			
-			resultsMap.put("count", patientCount);
+			int numberOfPersons = 0;
+			
+			if (includePersons != null && includePersons == true) {
+				Vector<Object> peopleList = this.findBatchOfPeople(searchValue, includeVoided, null, start, length);
+				
+				Collection<Object> tmpObjectList = new Vector<Object>();
+				tmpObjectList.addAll(peopleList);
+				tmpObjectList.addAll(objectList);
+				objectList = new Vector<Object>();
+				objectList = tmpObjectList;
+				numberOfPersons = peopleList.size();
+			}
+			
+			resultsMap.put("count", patientCount + numberOfPersons);
 			resultsMap.put("objectList", objectList);
 		}
 		catch (Exception e) {
@@ -314,9 +338,9 @@ public class DWRPatientService implements GlobalPropertyListener {
 	 * @should not signal for a new search if the new search value has no matches
 	 * @should match patient with identifiers that contain no digit
 	 */
-	public Map<String, Object> findCountAndPatients(String searchValue, Integer start, Integer length, boolean getMatchCount)
-	        throws APIException {
-		return findCountAndPatientsWithVoided(searchValue, start, length, getMatchCount, false);
+	public Map<String, Object> findCountAndPatients(String searchValue, Integer start, Integer length,
+	        boolean getMatchCount, Boolean includePersons) throws APIException {
+		return findCountAndPatientsWithVoided(searchValue, start, length, getMatchCount, false, includePersons);
 	}
 	
 	/**
@@ -347,8 +371,9 @@ public class DWRPatientService implements GlobalPropertyListener {
 	public Vector<Object> findPatientsByIdentifier(String[] identifiers) {
 		Vector<Object> patientList = new Vector<>();
 		for (String identifier : identifiers) {
-			List<PatientIdentifier> patientIdentifiers = Context.getPatientService().getPatientIdentifiers(identifier, null, null, null, true);
-			if(patientIdentifiers.size() > 0){
+			List<PatientIdentifier> patientIdentifiers = Context.getPatientService().getPatientIdentifiers(identifier,
+					null, null, null, true);
+			if (patientIdentifiers.size() > 0) {
 				patientList.add(new PatientListItem(patientIdentifiers.get(0).getPatient()));
 			}
 		}
@@ -406,7 +431,7 @@ public class DWRPatientService implements GlobalPropertyListener {
 		LocationService ls = Context.getLocationService();
 		Patient p = ps.getPatient(patientId);
 		PatientIdentifierType idType = ps.getPatientIdentifierTypeByName(identifierType);
-		//ps.updatePatientIdentifier(pi);
+		// ps.updatePatientIdentifier(pi);
 		Location location = ls.getLocation(identifierLocationId);
 		log.debug("idType=" + identifierType + "->" + idType + " , location=" + identifierLocationId + "->" + location
 		        + " identifier=" + identifier);
@@ -415,7 +440,8 @@ public class DWRPatientService implements GlobalPropertyListener {
 		id.setIdentifier(identifier);
 		id.setLocation(location);
 		
-		// in case we are editing, check to see if there is already an ID of this type and location
+		// in case we are editing, check to see if there is already an ID of this type
+		// and location
 		for (PatientIdentifier previousId : p.getActiveIdentifiers()) {
 			if (previousId.getIdentifierType().equals(idType) && previousId.getLocation().equals(location)) {
 				log.debug("Found equivalent ID: [" + idType + "][" + location + "][" + previousId.getIdentifier()
@@ -613,17 +639,15 @@ public class DWRPatientService implements GlobalPropertyListener {
 		String ret = "";
 		
 		/*
-		
-		if ( patientId != null && locationId != null ) {
-			Patient patient = Context.getPatientService().getPatient(patientId);
-			Location location = Context.getEncounterService().getLocation(locationId);
-			
-			if ( patient != null && location != null ) {
-				patient.setHealthCenter(location);
-				Context.getPatientService().updatePatient(patient);
-			}
-		}
-		*/
+		 * 
+		 * if ( patientId != null && locationId != null ) { Patient patient =
+		 * Context.getPatientService().getPatient(patientId); Location location =
+		 * Context.getEncounterService().getLocation(locationId);
+		 * 
+		 * if ( patient != null && location != null ) {
+		 * patient.setHealthCenter(location);
+		 * Context.getPatientService().updatePatient(patient); } }
+		 */
 		
 		return ret;
 	}
@@ -666,5 +690,55 @@ public class DWRPatientService implements GlobalPropertyListener {
 		}
 		
 		return OpenmrsConstants.GLOBAL_PROPERTY_PERSON_SEARCH_MAX_RESULTS_DEFAULT_VALUE;
+	}
+	
+	private Vector<Object> findBatchOfPeople(String searchPhrase, boolean includeRetired, String roles, Integer start,
+	        Integer length) {
+		Vector<Object> personList = new Vector<Object>();
+		
+		PersonService personService = Context.getPersonService();
+		try {
+			Boolean includeVoided = includeRetired;
+			
+			// TODO add batch person look up to the API and use it here and FIX the javadocs
+			// if no roles were given, search for normal people
+			PersonService ps = Context.getPersonService();
+			for (Person p : ps.getPeople(searchPhrase, null, includeVoided)) {
+				PersonListItem personListItem = createBestMatchPerson(p);
+				if (personListItem != null) {
+					personListItem.setRelationships(personService.getRelationshipsByPerson(new Person(personListItem
+					        .getPersonId())));
+					personList.add(personListItem);
+					
+				}
+			}
+			
+			// also search on patient identifier if the query contains a number
+			if (searchPhrase.matches(".*\\d+.*")) {
+				PatientService patientService = Context.getPatientService();
+				for (Patient p : patientService.getPatients(searchPhrase, null, null, false)) {
+					PersonListItem personListItem = createBestMatchPerson(p);
+					if (personListItem != null) {
+						personListItem.setRelationships(personService.getRelationshipsByPerson(new Person(personListItem
+						        .getPersonId())));
+						personList.add(personListItem);
+					}
+				}
+			}
+			
+		}
+		catch (Exception e) {
+			log.error("Error while searching for persons", e);
+			personList.clear();
+			personList.add(Context.getMessageSourceService().getMessage("Person.search.error") + " - " + e.getMessage());
+		}
+		return personList;
+	}
+	
+	public PersonListItem createBestMatchPerson(Person person) {
+		if (!(person instanceof Patient)) {
+			return new PersonListItem(person);
+		}
+		return null;
 	}
 }

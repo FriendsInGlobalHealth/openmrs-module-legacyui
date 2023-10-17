@@ -13,7 +13,7 @@
 <script type="text/javascript">
 	var lastSearch;
 	$j(document).ready(function() {
-		new OpenmrsSearch("findEncounter", true, doEncounterSearch, doSelectionHandler, 
+		new OpenmrsSearch("findEncounter", true, false, doEncounterSearch, doSelectionHandler, 
 				[	{fieldName:"personName", header:omsgs.patientName},
 					{fieldName:"encounterType", header:omsgs.encounterType},
 					{fieldName:"formName", header:omsgs.encounterForm},

@@ -113,7 +113,7 @@ public class PortletController implements Controller {
 			if (uniqueRequestId.equals(lastRequestId)) {
 				model = (Map<String, Object>) session.getAttribute(WebConstants.OPENMRS_PORTLET_CACHED_MODEL);
 				
-				// remove cached parameters 
+				// remove cached parameters
 				List<String> parameterKeys = (List<String>) model.get("parameterKeys");
 				if (parameterKeys != null) {
 					for (String key : parameterKeys) {
@@ -161,7 +161,8 @@ public class PortletController implements Controller {
 			}
 			model.put("parameterKeys", parameterKeys); // so we can clean these up in the next request
 			
-			// if there's an authenticated user, put them, and their patient set, in the model
+			// if there's an authenticated user, put them, and their patient set, in the
+			// model
 			if (Context.getAuthenticatedUser() != null) {
 				model.put("authenticatedUser", Context.getAuthenticatedUser());
 			}
@@ -338,6 +339,7 @@ public class PortletController implements Controller {
 				
 				if (!model.containsKey("personRelationships") && Context.hasPrivilege(PrivilegeConstants.GET_RELATIONSHIPS)) {
 					List<Relationship> relationships = new ArrayList<Relationship>();
+					List<ConvertibleRelationship> convertibleRelationships = new ArrayList<PortletController.ConvertibleRelationship>();
 					relationships.addAll(Context.getPersonService().getRelationshipsByPerson(p));
 					Map<RelationshipType, List<Relationship>> relationshipsByType = new HashMap<RelationshipType, List<Relationship>>();
 					for (Relationship rel : relationships) {
@@ -347,14 +349,18 @@ public class PortletController implements Controller {
 							relationshipsByType.put(rel.getRelationshipType(), list);
 						}
 						list.add(rel);
+						
+						convertibleRelationships.add(new ConvertibleRelationship(rel, rel.getPersonA(), rel.getPersonB()));
 					}
 					
 					model.put("personRelationships", relationships);
+					model.put("convertiblePersonRelationships", convertibleRelationships);
 					model.put("personRelationshipsByType", relationshipsByType);
 				}
 			}
 			
-			// if an encounter id is available, put "encounter" and "encounterObs" in the model
+			// if an encounter id is available, put "encounter" and "encounterObs" in the
+			// model
 			o = request.getAttribute("org.openmrs.portlet.encounterId");
 			if (o != null && !model.containsKey("encounterId")) {
 				if (!model.containsKey("encounter") && Context.hasPrivilege(PrivilegeConstants.GET_ENCOUNTERS)) {
@@ -423,6 +429,60 @@ public class PortletController implements Controller {
 	 * could be null when this method is called.
 	 */
 	protected void populateModel(HttpServletRequest request, Map<String, Object> model) {
+	}
+	
+	public class ConvertibleRelationship {
+		
+		private Integer relationshipId;
+		
+		private Boolean isConvertible = Boolean.FALSE;
+		
+		private final Integer HIV_TEST_CONCEPT_ID = 23779;
+		
+		private final Integer POSETIVE_ANSWER_CONCEPT_ID = 703;
+		
+		public ConvertibleRelationship() {
+		}
+		
+		public ConvertibleRelationship(Relationship relationship, Person personA, Person personB) {
+			this.relationshipId = relationship.getRelationshipId();
+			
+			if (!personA.getIsPatient()) {
+				List<Obs> observations = Context.getObsService().getObservationsByPersonAndConcept(personA,
+				    new Concept(HIV_TEST_CONCEPT_ID));
+				for (Obs obs : observations) {
+					if (obs.getValueCoded() != null && POSETIVE_ANSWER_CONCEPT_ID.equals(obs.getValueCoded().getConceptId())) {
+						this.isConvertible = Boolean.TRUE;
+						return;
+					}
+				}
+			}
+			
+			if (!personB.getIsPatient()) {
+				List<Obs> observations = Context.getObsService().getObservationsByPersonAndConcept(personB,
+				    new Concept(HIV_TEST_CONCEPT_ID));
+				for (Obs obs : observations) {
+					if (obs.getValueCoded() != null && POSETIVE_ANSWER_CONCEPT_ID.equals(obs.getValueCoded().getConceptId())) {
+						this.isConvertible = Boolean.TRUE;
+						return;
+					}
+				}
+			}
+		}
+		
+		/**
+		 * Does a shallow copy of this Relationship. Does NOT copy relationshipId
+		 * 
+		 * @return a copy of this relationship
+		 */
+		
+		public Integer getRelationshipId() {
+			return relationshipId;
+		}
+		
+		public Boolean getIsConvertible() {
+			return isConvertible;
+		}
 	}
 	
 }

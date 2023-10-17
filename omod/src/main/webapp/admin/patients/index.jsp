@@ -14,14 +14,15 @@
 
 <script type="text/javascript">
 	$j(document).ready(function() {
-		new OpenmrsSearch("findPatients", true, doPatientSearch, doSelectionHandler,
+		new OpenmrsSearch("findPatients", true, true, doPatientSearch, doSelectionHandler,
 				[	{fieldName:"identifier", header:omsgs.identifier},
 					{fieldName:"givenName", header:omsgs.givenName},
 					{fieldName:"middleName", header:omsgs.middleName},
 					{fieldName:"familyName", header:omsgs.familyName},
 					{fieldName:"age", header:omsgs.age},
 					{fieldName:"gender", header:omsgs.gender},
-					{fieldName:"birthdateString", header:omsgs.birthdate}
+					{fieldName:"birthdateString", header:omsgs.birthdate},
+					{fieldName:"relationship", header:omsgs.relationship}
 				],
 				{
                     searchLabel: '<openmrs:message code="Patient.searchBox" javaScriptEscape="true"/>',
@@ -50,11 +51,15 @@
 	
 	//searchHandler for the Search widget
 	function doPatientSearch(text, resultHandler, getMatchCount, opts) {
-		DWRPatientService.findCountAndPatientsWithVoided(text, opts.start, opts.length, getMatchCount, includeVoidedPatients(), resultHandler);
+		DWRPatientService.findCountAndPatientsWithVoided(text, opts.start, opts.length, getMatchCount, includeVoidedPatients(), includePersons(), resultHandler);
 	}
 
 	function includeVoidedPatients() {
 	    return document.getElementById("includeVoided").checked;
+	}
+	
+	function includePersons() {
+	    return document.getElementById("includePersons").checked;
 	}
 </script>
 
