@@ -10,23 +10,27 @@
 package org.openmrs.web.controller.patient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.Vector;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Encounter;
+import org.openmrs.Obs;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
@@ -49,7 +53,8 @@ public class MergePatientsFormController extends SimpleFormController {
 	
 	protected ModelAndView processFormSubmission(HttpServletRequest request, HttpServletResponse response, Object object,
 	        BindException errors) throws Exception {
-		//ModelAndView view = super.processFormSubmission(request, response, object, errors);
+		// ModelAndView view = super.processFormSubmission(request, response, object,
+		// errors);
 		
 		log.debug("Number of errors: " + errors.getErrorCount());
 		
@@ -107,7 +112,7 @@ public class MergePatientsFormController extends SimpleFormController {
 				if (message == null || "".equals(message)) {
 					message = "Patient.merge.fail";
 				}
-				httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, message);
+				httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, getFormattedErrorMessage(message));
 				return showForm(request, response, errors);
 			}
 			
@@ -208,7 +213,8 @@ public class MergePatientsFormController extends SimpleFormController {
 		OrderService os = Context.getOrderService();
 		patientList.forEach(patient -> {
 			os.getAllOrdersByPatient(patient).forEach(order -> {
-				if (!order.isActive()) return;
+				if (!order.isActive())
+					return;
 				Set<Patient> patients = activeOrderAndPatientsMap.getOrDefault(order.getOrderType(), new HashSet<>());
 				patients.add(patient);
 				activeOrderAndPatientsMap.putIfAbsent(order.getOrderType(), patients);
@@ -217,24 +223,133 @@ public class MergePatientsFormController extends SimpleFormController {
 		return activeOrderAndPatientsMap;
 	}
 	
-	private String buildErrorMessage(Map<OrderType, Set<Patient>> activeOrderAndPatientsMap){
+	private String buildErrorMessage(Map<OrderType, Set<Patient>> activeOrderAndPatientsMap) {
 		String ACTIVE_DRUG_ORDER_ERR = "Active [ORDER_TYPE] orders exist for patientsPATIENT_IDS.<br />";
 		String ACTIVE_DRUG_ORDER_WARN = "More than one patient having active order of same type is Not allowed";
-		String[] errorMessages = new String[]{""};
+		String[] errorMessages = new String[] { "" };
 		activeOrderAndPatientsMap.forEach((OrderType orderType, Set<Patient> patients) -> {
-			if (patients.size() < 2) return;
+			if (patients.size() < 2)
+				return;
 			String patientIds = patients.stream()
-				.map((Patient patient) -> patient.getPatientIdentifier().getIdentifier())
-				.reduce("", (id1, id2) -> id1 + ", " + id2);
+					.map((Patient patient) -> patient.getPatientIdentifier().getIdentifier())
+					.reduce("", (id1, id2) -> id1 + ", " + id2);
 
-			errorMessages[0] += ACTIVE_DRUG_ORDER_ERR
-				.replace("ORDER_TYPE",orderType.toString())
-				.replace("PATIENT_IDS",patientIds);
+			errorMessages[0] += ACTIVE_DRUG_ORDER_ERR.replace("ORDER_TYPE", orderType.toString()).replace("PATIENT_IDS",
+					patientIds);
 		});
 
-		if(!"".equals(errorMessages[0])){
+		if (!"".equals(errorMessages[0])) {
 			return errorMessages[0] + ACTIVE_DRUG_ORDER_WARN;
 		}
 		return "";
+	}
+	
+	private String getFormattedErrorMessage(String message) {
+		
+		Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+		
+		if (message.contains("Obs")) {
+			
+			String firstToken = StringUtils.substring(message, message.indexOf("#"));
+			
+			if (StringUtils.isNotEmpty(firstToken)) {
+				String secondToken = StringUtils.substring(firstToken, 1, firstToken.indexOf("'"));
+				
+				if (StringUtils.isNotEmpty(secondToken)) {
+					
+					if (pattern.matcher(secondToken).matches()) {
+						
+						Integer obsId = Integer.valueOf(secondToken);
+						
+						Obs obs = Context.getObsService().getObs(obsId);
+						
+						StringBuilder sb = new StringBuilder();
+						
+						sb.append("OBS ID: " + obsId + ", ");
+						sb.append("\t PATIENT ID: " + obs.getPersonId() + ", ");
+						sb.append("\t PATIENT NAME: " + obs.getPerson().getPersonName().getFullName() + ", ");
+						sb.append("\t ENCOUNTER ID: " + obs.getEncounter().getId() + ", ");
+						sb.append("\t TIPO DE CONSULTA: " + obs.getEncounter().getEncounterType().getName());
+						
+						sb.append(". Houve um erro na validação de possível valor inconsistente: ");
+						
+						if (obs.isObsGrouping()) {
+							
+							Set<Obs> relatedObservations = obs.getRelatedObservations();
+							
+							for (Obs obs2 : relatedObservations) {
+								
+								if (!obs2.isObsGrouping()) {
+									
+									if (Objects.nonNull(obs2.getValueNumeric())) {
+										sb.append("Conceito: " + obs.getConcept().getName());
+										sb.append("\t  => valor: ");
+										sb.append(obs2.getValueNumeric());
+										sb.append("\t");
+									}
+									
+									if (Objects.nonNull(obs2.getValueText())) {
+										
+										sb.append("Conceito: " + obs.getConcept().getName());
+										sb.append("\t  => valor: ");
+										sb.append(obs2.getValueText());
+										sb.append("\t");
+									}
+									
+									if (Objects.nonNull(obs2.getValueDatetime())) {
+										sb.append("Conceito: " + obs.getConcept().getName());
+										sb.append("\t  => valor: ");
+										sb.append(obs2.getValueDatetime());
+										sb.append("\t");
+									}
+									
+									if (Objects.nonNull(obs2.getValueCoded())) {
+										sb.append("Conceito: " + obs.getConcept().getName());
+										sb.append("\t  => valor: ");
+										sb.append(obs2.getValueCoded());
+										sb.append("\t");
+									}
+									
+								}
+							}
+						} else {
+							
+							if (Objects.nonNull(obs.getValueNumeric())) {
+								sb.append("Conceito: " + obs.getConcept().getName());
+								sb.append("\t  => valor: ");
+								sb.append(obs.getValueNumeric());
+								sb.append("\t");
+							}
+							
+							if (Objects.nonNull(obs.getValueText())) {
+								sb.append("Conceito: " + obs.getConcept().getName());
+								sb.append("\t  => valor: ");
+								sb.append(obs.getValueText());
+								sb.append("\t");
+							}
+							
+							if (Objects.nonNull(obs.getValueDatetime())) {
+								sb.append("Conceito: " + obs.getConcept().getName());
+								sb.append("\t  => valor: ");
+								sb.append(obs.getValueDatetime());
+								sb.append("\t");
+							}
+							
+							if (Objects.nonNull(obs.getValueCoded())) {
+								sb.append("Conceito: " + obs.getConcept().getName());
+								sb.append("\t  => valor: ");
+								sb.append(obs.getValueCoded());
+								sb.append("\t");
+							}
+						}
+						sb.append(". Consulte a consulta com o ID:  " + obs.getEncounter().getId()
+						        + " e corriga o possível valor inconsistente");
+						
+						return sb.toString();
+					}
+				}
+			}
+		}
+		return message;
 	}
 }
