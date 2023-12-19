@@ -9,6 +9,7 @@
  */
 package org.openmrs.web.controller.patient;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -246,6 +247,8 @@ public class MergePatientsFormController extends SimpleFormController {
 	
 	private String getFormattedErrorMessage(String message) {
 		
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+		
 		Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 		
 		if (message.contains("Obs")) {
@@ -265,11 +268,12 @@ public class MergePatientsFormController extends SimpleFormController {
 						
 						StringBuilder sb = new StringBuilder();
 						
-						sb.append("OBS ID: " + obsId + ", ");
-						sb.append("\t PATIENT ID: " + obs.getPersonId() + ", ");
-						sb.append("\t PATIENT NAME: " + obs.getPerson().getPersonName().getFullName() + ", ");
-						sb.append("\t ENCOUNTER ID: " + obs.getEncounter().getId() + ", ");
-						sb.append("\t TIPO DE CONSULTA: " + obs.getEncounter().getEncounterType().getName());
+						sb.append("ID da Obs: " + obsId + ", ");
+						sb.append("\t ID do Paciente: " + obs.getPersonId() + ", ");
+						sb.append("\t Nome do Paciente: " + obs.getPerson().getPersonName().getFullName() + ", ");
+						sb.append("\t ID da Consulta: " + obs.getEncounter().getId() + ", ");
+						sb.append("\t Tipo de Consulta: " + obs.getEncounter().getEncounterType().getName());
+						sb.append("\t Data da consulta: " + formatter.format(obs.getEncounter().getEncounterDatetime()));
 						
 						sb.append(". Houve um erro na validação de possível valor inconsistente: ");
 						
