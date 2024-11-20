@@ -21,7 +21,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>legacyui</artifactId>
-	<version>1.16.0</version>
+	<version>1.16.0.csaude</version>
 	<packaging>pom</packaging>
 	<name>Legacy UI Module</name>
 	<description>Provides the legacy UI which was removed from the platform since version 2.0</description>
@@ -44,6 +44,19 @@
         <url>https://github.com/openmrs/openmrs-module-legacyui.git</url>
       <tag>1.16.0</tag>
   </scm>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub csaude Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/csaude/openmrs-module-legacyui</url>
+		</repository>
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub csaude Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/csaude/openmrs-module-legacyui</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<modules>
 		<module>api</module>
@@ -269,19 +282,6 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
-
-    <distributionManagement>
-        <repository>
-            <id>openmrs-repo-modules</id>
-            <name>OpenMRS Modules</name>
-            <url>https://mavenrepo.openmrs.org/modules</url>
-        </repository>
-        <snapshotRepository>
-            <id>openmrs-repo-snapshots</id>
-            <name>OpenMRS Snapshots</name>
-            <url>https://mavenrepo.openmrs.org/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
 	<profiles>
 		<profile>
